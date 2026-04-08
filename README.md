@@ -1,6 +1,5 @@
 # AtlasDB
 
-![Tests](https://github.com/SamuelOsondu/atlasdb-backend/actions/workflows/test.yml/badge.svg)
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
 ![Python](https://img.shields.io/badge/python-3.12-blue.svg)
 
@@ -52,7 +51,6 @@ app/
 ├── query_engine/   # RAG orchestration: context assembly, LLM streaming, citations
 └── shared/         # Unified response schemas, enums, pagination
 alembic/            # Database migrations
-tests/              # Full test suite (per component)
 ```
 
 ---
@@ -181,16 +179,6 @@ alembic upgrade head
 
 uvicorn app.main:app --reload
 ```
-
----
-
-## Running Tests
-
-```bash
-pytest
-```
-
-Tests run against a real PostgreSQL + pgvector database. External calls (OpenAI embeddings, LLM streaming) are monkeypatched — no real API key required to run the suite.
 
 ---
 

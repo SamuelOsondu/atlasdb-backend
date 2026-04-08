@@ -11,9 +11,11 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
-    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    command: >
+      sh -c "alembic upgrade head &&
+             uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload"
     volumes:
-      - ./uploads:/app/uploads
+      - .:/app
 
   worker-cpu:
     build: .
@@ -23,9 +25,9 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
-    command: celery -A app.celery_app worker --loglevel=info -Q cpu_bound -c 2
+    command: sh -c "alembic upgrade head && celery -A app.celery_app worker --loglevel=info -Q cpu_bound -c 2"
     volumes:
-      - ./uploads:/app/uploads
+      - .:/app
 
   worker-io:
     build: .
@@ -35,14 +37,16 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
-    command: celery -A app.celery_app worker --loglevel=info -Q io_bound -c 4
+    command: sh -c "alembic upgrade head && celery -A app.celery_app worker --loglevel=info -Q io_bound -c 4"
 
   db:
     image: pgvector/pgvector:pg16
+    env_file:
+      - .env
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: atlasdb
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
     ports:
       - "5432:5432"
     volumes:

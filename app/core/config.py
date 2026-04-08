@@ -38,7 +38,7 @@ class Settings(BaseSettings):
     EMBEDDING_BATCH_SIZE: int = 200
 
     # Retrieval
-    MIN_SIMILARITY_SCORE: float = 0.7
+    MIN_SIMILARITY_SCORE: float = 0.4
 
     # Query engine
     MAX_CHUNKS_PER_QUERY: int = 8

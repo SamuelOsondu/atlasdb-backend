@@ -1,0 +1,17 @@
+.env
+.git
+.gitignore
+__pycache__
+*.pyc
+*.pyo
+.pytest_cache
+.coverage
+htmlcov
+.venv
+venv
+*.egg-info
+dist
+build
+.idea
+.claude
+uploads

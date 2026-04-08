@@ -1,5 +1,9 @@
 # AtlasDB
 
+![Tests](https://github.com/SamuelOsondu/atlasdb-backend/actions/workflows/test.yml/badge.svg)
+![License](https://img.shields.io/badge/license-MIT-blue.svg)
+![Python](https://img.shields.io/badge/python-3.12-blue.svg)
+
 A production-ready RAG (Retrieval-Augmented Generation) backend that turns your documents into a semantically searchable knowledge base with grounded, citation-backed conversational answers.
 
 ---
@@ -29,6 +33,7 @@ A production-ready RAG (Retrieval-Augmented Generation) backend that turns your 
 | File Storage | Local filesystem (dev) / S3-compatible (prod) |
 | Rate Limiting | slowapi |
 | Streaming | Server-Sent Events (SSE) |
+
 
 ---
 
@@ -146,20 +151,14 @@ docker-compose up --build
 ```
 
 This starts:
-- `api` — FastAPI on http://localhost:8000
+- `api` — FastAPI on http://localhost:8000 (migrations run automatically on startup)
 - `worker-cpu` — Celery worker for text extraction and chunking
 - `worker-io` — Celery worker for embedding and indexing
 - `db` — PostgreSQL 16 with pgvector
 - `redis` — Redis (broker + cancellation store)
 - `flower` — Celery monitoring UI on http://localhost:5555
 
-### 3. Run migrations
-
-```bash
-docker-compose exec api alembic upgrade head
-```
-
-### 4. Explore the API
+### 3. Explore the API
 
 - Swagger UI: http://localhost:8000/docs
 - ReDoc: http://localhost:8000/redoc
@@ -191,32 +190,35 @@ uvicorn app.main:app --reload
 pytest
 ```
 
-Tests use an in-memory SQLite-compatible async setup — no real database or OpenAI calls required. External calls (embeddings, LLM streaming) are monkeypatched.
+Tests run against a real PostgreSQL + pgvector database. External calls (OpenAI embeddings, LLM streaming) are monkeypatched — no real API key required to run the suite.
 
 ---
 
 ## Environment Variables
 
-| Variable | Required | Default | Description |
-|---|---|---|---|
-| `DATABASE_URL` | ✅ | — | PostgreSQL async connection string |
-| `REDIS_URL` | ✅ | `redis://localhost:6379/0` | Redis connection string |
-| `OPENAI_API_KEY` | ✅ | — | OpenAI API key |
-| `JWT_SECRET_KEY` | ✅ | — | Secret for signing JWTs |
-| `JWT_ALGORITHM` | | `HS256` | JWT signing algorithm |
-| `ACCESS_TOKEN_EXPIRE_MINUTES` | | `15` | Access token TTL |
-| `REFRESH_TOKEN_EXPIRE_DAYS` | | `7` | Refresh token TTL |
-| `LLM_MODEL` | | `gpt-4o-mini` | OpenAI chat model |
-| `EMBEDDING_MODEL` | | `text-embedding-3-small` | OpenAI embedding model |
-| `STORAGE_BACKEND` | | `local` | `local` or `s3` |
-| `STORAGE_LOCAL_PATH` | | `./uploads` | Local file storage path |
-| `S3_BUCKET_NAME` | S3 only | — | S3 bucket name |
-| `S3_REGION` | S3 only | — | AWS region |
-| `S3_ACCESS_KEY_ID` | S3 only | — | AWS access key |
-| `S3_SECRET_ACCESS_KEY` | S3 only | — | AWS secret key |
-| `MAX_FILE_SIZE_MB` | | `50` | Max upload size |
-| `MAX_CHUNKS_PER_QUERY` | | `8` | Max chunks used per RAG query |
-| `CONTEXT_TOKEN_BUDGET` | | `6000` | Token budget for assembled context |
+| Variable                      | Required | Default                    | Description                       |
+|-------------------------------|----------|----------------------------|-----------------------------------|
+| `DATABASE_URL`                | ✅        | —                          | PostgreSQL async connection string |
+| `REDIS_URL`                   | ✅        | `redis://localhost:6379/0` | Redis connection string           |
+| `OPENAI_API_KEY`              | ✅        | —                          | OpenAI API key                    |
+| `JWT_SECRET_KEY`              | ✅        | —                          | Secret for signing JWTs           |
+| `POSTGRES_USER`               | ✅        | —                          | Your database user                |
+| `POSTGRES_DB`                 | ✅        | —                          | Your database                     |
+| `POSTGRES_PASSWORD`           | ✅        |                            | Postgress password |
+|  `JWT_ALGORITHM`              |          | `HS256`                    | JWT signing algorithm |
+| `ACCESS_TOKEN_EXPIRE_MINUTES` |          | `15`                       | Access token TTL                  |
+| `REFRESH_TOKEN_EXPIRE_DAYS`   |          | `7`                        | Refresh token TTL                 |
+| `LLM_MODEL`                   |          | `gpt-4o-mini`              | OpenAI chat model                 |
+| `EMBEDDING_MODEL`             |          | `text-embedding-3-small`   | OpenAI embedding model            |
+| `STORAGE_BACKEND`             |          | `local`                    | `local` or `s3`                   |
+| `STORAGE_LOCAL_PATH`          |          | `./uploads`                | Local file storage path           |
+| `S3_BUCKET_NAME`              | S3 only  | —                          | S3 bucket name                    |
+| `S3_REGION`                   | S3 only  | —                          | AWS region                        |
+| `S3_ACCESS_KEY_ID`            | S3 only  | —                          | AWS access key                    |
+| `S3_SECRET_ACCESS_KEY`        | S3 only  | —                          | AWS secret key                    |
+| `MAX_FILE_SIZE_MB`            |          | `50`                       | Max upload size                   |
+| `MAX_CHUNKS_PER_QUERY`        |          | `8`                        | Max chunks used per RAG query     |
+| `CONTEXT_TOKEN_BUDGET`        |          | `6000`                     | Token budget for assembled context |
 
 ---
 

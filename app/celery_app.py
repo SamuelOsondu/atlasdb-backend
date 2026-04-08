@@ -1,6 +1,8 @@
 from celery import Celery
 
 from app.core.config import settings
+import app.domains.models  # noqa: F401 — registers knowledge_domains table in SQLAlchemy metadata
+import app.users.models    # noqa: F401 — registers users table in SQLAlchemy metadata
 
 celery_app = Celery(
     "atlasdb",
